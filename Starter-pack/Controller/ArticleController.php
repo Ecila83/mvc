@@ -21,21 +21,35 @@ class ArticleController
         // Note: you might want to use a re-usable databaseManager class - the choice is yours
         //  fetch all articles as 
    
-        $statement = $pdo->query('SELECT title, description, publish_date FROM articles');
-        $rawArticles = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-        $articles = [];
-        foreach ($rawArticles as $rawArticle) {
-          
-            $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date']);
+    try {
+ 
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $statement = $pdo->query(
+            'SELECT title, description, publish_date FROM articles'
+        );
+
+        $articles= [];
+        while ($rawArticles = $statement->fetch()) {
+            $articles = [
+                'title' => $row['title'],
+                'description' => $row['description'],
+                'publish_date' => $row['publish_date'],
+            ];
+
+            $articles[] = $article;
         }
 
         return $articles;
+    } catch (PDOException $e) {
+        echo 'Erreur de connexion : ' . $e->getMessage();
+        exit();
     }
-
+    }
     public function show()
     {
         // TODO: this can be used for a detail page
-        $aricles = $this->getArticles();
+
     }
 }
