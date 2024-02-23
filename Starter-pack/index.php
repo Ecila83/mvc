@@ -27,6 +27,8 @@ switch ($page) {
         break;
     case 'articles-show':
         // TODO: detail page
+        $id = intval($_GET['id']);
+        (new ArticleController())->show($id);
     case 'home':
     default:
         (new HomepageController())->index();

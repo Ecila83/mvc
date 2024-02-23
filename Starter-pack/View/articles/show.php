@@ -6,10 +6,26 @@
     <h1><?= $article->title ?></h1>
     <p><?= $article->formatPublishDate() ?></p>
     <p><?= $article->description ?></p>
+    <p><?=$article->author?>
 
-    <?php // TODO: links to next and previous ?>
-    <a href="#">Previous article</a>
-    <a href="#">Next article</a>
+    <?php if ($prev !== null || $next !== null): ?>
+    <div>
+        <?php 
+        if ($prev !== null) {
+            echo "<a href='?page=articles-show&id=$prev'>Article précédent</a>";
+        }
+
+        if ($prev !== null && $next !== null) {
+            echo " | ";
+        }
+
+        if ($next !== null) {
+            echo "<a href='?page=articles-show&id=$next'>Article suivant</a>";
+        }
+        ?>
+    </div>
+    <?php endif; ?>
+    
 </section>
 
 <?php require 'View/includes/footer.php'?>

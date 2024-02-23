@@ -4,9 +4,10 @@
 
 <section>
     <h1>Articles</h1>
+    
     <ul>
-        <?php foreach ($articles as $article) : ?>
-            <li><?= $article->title ?> (<?= $article->formatPublishDate() ?></li>
+        <?php foreach ($articles as $index => $article) : ?>
+            <li><a href="?page=articles-show&id=<?= $index ?>"><?= $article->title ?> (<?= $article->formatPublishDate() ?>)</a></li>
         <?php endforeach; ?>
     </ul>
 </section>

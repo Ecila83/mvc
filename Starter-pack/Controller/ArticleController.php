@@ -1,8 +1,7 @@
 <?php
 declare(strict_types = 1);
 require("Model/database.php");
- //  database connection
-$pdo = database();
+
 class ArticleController
 {
     public function index()
@@ -22,34 +21,54 @@ class ArticleController
         //  fetch all articles as 
    
 
-    try {
- 
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        $statement = $pdo->query(
-            'SELECT title, description, publish_date FROM articles'
-        );
+        try {
+            //  database connection
+            $pdo = database();
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            
+            $statement = $pdo->query(
+                'SELECT title, description, publish_date, author FROM articles ORDER BY publish_date'
+            );
 
-        $articles= [];
-        while ($rawArticles = $statement->fetch()) {
-            $articles = [
-                'title' => $row['title'],
-                'description' => $row['description'],
-                'publish_date' => $row['publish_date'],
-            ];
+            $rawArticles = $statement->fetchAll();
 
-            $articles[] = $article;
+            $articles = [];
+            foreach ($rawArticles as $rawArticle) {
+                // We are converting an article from a "dumb" array to a much more flexible class
+                $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author']);
+            }
+    
+            return $articles;
+        } catch (PDOException $e) {
+            echo 'Error connection : ' . $e->getMessage();
+            exit();
         }
-
-        return $articles;
-    } catch (PDOException $e) {
-        echo 'Erreur de connexion : ' . $e->getMessage();
-        exit();
     }
-    }
-    public function show()
+    public function show(int $id)
     {
+        $pdo = database();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
         // TODO: this can be used for a detail page
 
+        // Get nombre d'article.
+        $countStatement = $pdo->query("SELECT count(id) FROM articles");
+        $count = $countStatement->fetchColumn();
+
+        
+        // TODO : A change et utiliser "prepare statement".
+        $statement = $pdo->prepare(
+            "SELECT title, description, publish_date, author FROM articles ORDER BY publish_date LIMIT 1 OFFSET ?"
+        );
+        $statement->bindParam(1, $id, PDO::PARAM_INT);
+        $statement->execute();
+        $rawArticle = $statement->fetch();
+
+        $article = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'],$rawArticle['author']);
+        $prev = ($id > 0) ? ($id - 1) : null;
+        $next = ($id < ($count - 1)) ? ($id + 1) : null;
+
+        // Load the view
+        require 'View/articles/show.php';
     }
 }
