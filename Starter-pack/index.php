@@ -29,7 +29,11 @@ switch ($page) {
         // TODO: detail page
         $id = intval($_GET['id']);
         (new ArticleController())->show($id);
+    case 'sortByAuthor':
+        (new ArticleController())->sortByAuthor();
+        break;
     case 'home':
+    
     default:
         (new HomepageController())->index();
         break;

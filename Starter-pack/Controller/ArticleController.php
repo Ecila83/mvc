@@ -2,6 +2,8 @@
 declare(strict_types = 1);
 require("Model/database.php");
 
+
+
 class ArticleController
 {
     public function index()
@@ -70,5 +72,45 @@ class ArticleController
 
         // Load the view
         require 'View/articles/show.php';
+    }
+
+    public function sortByAuthor()
+    {
+        $pdo = database();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $author = $_GET['author'] ?? null;
+
+        try {
+
+            if ($author) {
+                $statement = $pdo->prepare(
+                    'SELECT title, description, publish_date, author FROM articles WHERE author = ? ORDER BY publish_date'
+                );
+                $statement->execute([$author]);
+            } else {
+                $statement = $pdo->query(
+                    'SELECT title, description, publish_date, author FROM articles ORDER BY author'
+                );
+            }
+ 
+            $rawArticles = $statement->fetchAll();
+    
+            $articles = [];
+            foreach ($rawArticles as $rawArticle) {
+                $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author']);
+            }
+            $authorsQuery = $pdo->query(
+                'SELECT DISTINCT author FROM articles ORDER BY author'
+            );
+            $authors = $authorsQuery->fetchAll(PDO::FETCH_COLUMN);
+
+            $page = $_GET['page'] ?? null;
+
+            require 'View/articles/sortedByAuthor.php';
+        } catch (PDOException $e) {
+            echo 'Erreur de connexion : ' . $e->getMessage();
+            exit();
+        }
     }
 }
