@@ -29,6 +29,7 @@ switch ($page) {
         // TODO: detail page
         $id = intval($_GET['id']);
         (new ArticleController())->show($id);
+        break;
     case 'sortByAuthor':
         (new ArticleController())->sortByAuthor();
         break;

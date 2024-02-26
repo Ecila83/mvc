@@ -5,6 +5,7 @@
 <section>
     <h1><?= $article->title ?></h1>
     <p><?= $article->formatPublishDate() ?></p>
+    <img src="<?= $article->url_images ?>" alt="<?= $article->title ?>"width="400" height="250">
     <p><?= $article->description ?></p>
     <p><?=$article->author?>
 

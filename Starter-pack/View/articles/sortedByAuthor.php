@@ -24,7 +24,8 @@
         <?php foreach ($articles as $article) : ?>
             <li>
                 <strong><?= $article->title ?></strong> (<?= $article->formatPublishDate() ?>) - <?= "By ".$article->author ?>
-                <p><?= $article->description ?></p>
+                
+                <p><img src="<?= $article->url_images ?>" alt="<?= $article->title ?>"width="400" height="250"><?= $article->description ?></p>
             </li>
         <?php endforeach; ?>
     </ul>

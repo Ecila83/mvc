@@ -3,7 +3,6 @@ declare(strict_types = 1);
 require("Model/database.php");
 
 
-
 class ArticleController
 {
     public function index()
@@ -18,10 +17,8 @@ class ArticleController
     // Note: this function can also be used in a repository - the choice is yours
     private function getArticles()
     {
-       
         // Note: you might want to use a re-usable databaseManager class - the choice is yours
         //  fetch all articles as 
-   
 
         try {
             //  database connection
@@ -29,7 +26,7 @@ class ArticleController
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             $statement = $pdo->query(
-                'SELECT title, description, publish_date, author FROM articles ORDER BY publish_date'
+                'SELECT title, description, publish_date, author,url_images FROM articles ORDER BY publish_date'
             );
 
             $rawArticles = $statement->fetchAll();
@@ -37,7 +34,7 @@ class ArticleController
             $articles = [];
             foreach ($rawArticles as $rawArticle) {
                 // We are converting an article from a "dumb" array to a much more flexible class
-                $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author']);
+                $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author'], $rawArticle['url_images']);
             }
     
             return $articles;
@@ -46,6 +43,7 @@ class ArticleController
             exit();
         }
     }
+
     public function show(int $id)
     {
         $pdo = database();
@@ -60,13 +58,14 @@ class ArticleController
         
         // TODO : A change et utiliser "prepare statement".
         $statement = $pdo->prepare(
-            "SELECT title, description, publish_date, author FROM articles ORDER BY publish_date LIMIT 1 OFFSET ?"
+            "SELECT title, description, publish_date, author,url_images FROM articles ORDER BY publish_date LIMIT 1 OFFSET ?"
         );
+
         $statement->bindParam(1, $id, PDO::PARAM_INT);
         $statement->execute();
         $rawArticle = $statement->fetch();
 
-        $article = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'],$rawArticle['author']);
+        $article = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author'], $rawArticle['url_images']);
         $prev = ($id > 0) ? ($id - 1) : null;
         $next = ($id < ($count - 1)) ? ($id + 1) : null;
 
@@ -82,15 +81,14 @@ class ArticleController
         $author = $_GET['author'] ?? null;
 
         try {
-
             if ($author) {
                 $statement = $pdo->prepare(
-                    'SELECT title, description, publish_date, author FROM articles WHERE author = ? ORDER BY publish_date'
+                    'SELECT title, description, publish_date, author, url_images FROM articles WHERE author = ? ORDER BY publish_date'
                 );
                 $statement->execute([$author]);
             } else {
                 $statement = $pdo->query(
-                    'SELECT title, description, publish_date, author FROM articles ORDER BY author'
+                    'SELECT title, description, publish_date, author, url_images FROM articles ORDER BY author'
                 );
             }
  
@@ -98,8 +96,9 @@ class ArticleController
     
             $articles = [];
             foreach ($rawArticles as $rawArticle) {
-                $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author']);
+                $articles[] = new Article($rawArticle['title'], $rawArticle['description'], $rawArticle['publish_date'], $rawArticle['author'], $rawArticle['url_images']);
             }
+
             $authorsQuery = $pdo->query(
                 'SELECT DISTINCT author FROM articles ORDER BY author'
             );
